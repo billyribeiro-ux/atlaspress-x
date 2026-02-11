@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { cn } from '@/lib/utils'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -61,10 +60,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn(
-        'min-h-screen bg-background font-sans antialiased',
-        inter.variable
-      )}>
+      <body className={`min-h-screen bg-background font-sans antialiased ${inter.variable}`}>
         <div className="relative flex min-h-screen flex-col">
           {children}
         </div>
