@@ -3,10 +3,10 @@
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from './ui/button'
-import { 
-  Menu, 
-  Search, 
-  Settings, 
+import {
+  Menu,
+  Search,
+  Settings,
   User,
   Bell,
   Moon,
@@ -38,7 +38,7 @@ export function AppHeader({ className, onMenuClick }: AppHeaderProps) {
         >
           <Menu className="h-5 w-5" />
         </Button>
-        
+
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-semibold text-foreground">
             AtlasPress X
@@ -51,8 +51,11 @@ export function AppHeader({ className, onMenuClick }: AppHeaderProps) {
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
+            id="global-search"
+            name="search"
             type="search"
             placeholder="Search..."
+            autoComplete="off"
             className="w-full h-10 pl-10 pr-4 rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
