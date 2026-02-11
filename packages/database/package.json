@@ -1,0 +1,32 @@
+{
+  "name": "@atlaspress/database",
+  "version": "0.1.0",
+  "description": "Database schema and utilities for AtlasPress X",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx src/seed.ts"
+  },
+  "dependencies": {
+    "@atlaspress/types": "workspace:*",
+    "@prisma/client": "^6.0.0",
+    "prisma": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.0"
+  },
+  "files": [
+    "dist",
+    "prisma"
+  ]
+}

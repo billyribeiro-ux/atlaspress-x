@@ -1,0 +1,361 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// Workspace & Multi-Tenancy
+// =============================================================================
+
+model Workspace {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  domain      String?  @unique
+  settings    Json     @default("{}")
+  plan        String   @default("starter") // starter, professional, enterprise
+  status      String   @default("active")  // active, inactive, cancelled
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  members         WorkspaceMember[]
+  content         Content[]
+  contentTypes    ContentType[]
+  mediaAssets     MediaAsset[]
+  analytics       ContentMetrics[]
+  workflows       WorkflowTemplate[]
+  dashboards      AnalyticsDashboard[]
+
+  @@map("workspaces")
+}
+
+// =============================================================================
+// User & Authentication
+// =============================================================================
+
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  name             String
+  avatar           String?
+  emailVerified    DateTime?
+  twoFactorEnabled Boolean   @default(false)
+  passwordHash     String?
+  lastLoginAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relations
+  workspaceMemberships WorkspaceMember[]
+  authoredContent     Content[]          @relation("ContentAuthor")
+  uploadedMedia       MediaAsset[]
+  workflowComments    WorkflowComment[]
+  workflowTransitions WorkflowTransition[]
+  createdWorkflows    WorkflowTemplate[]
+  createdDashboards   AnalyticsDashboard[]
+
+  @@map("users")
+}
+
+model WorkspaceMember {
+  id          String   @id @default(cuid())
+  userId      String
+  workspaceId String
+  role        String   // owner, admin, managing_editor, editor, author, contributor, analyst, viewer
+  permissions Json     @default("[]")
+  invitedBy   String
+  joinedAt    DateTime @default(now())
+  lastActiveAt DateTime?
+
+  // Relations
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@map("workspace_members")
+}
+
+// =============================================================================
+// Content Domain
+// =============================================================================
+
+model Content {
+  id            String   @id @default(cuid())
+  workspaceId   String
+  typeId        String
+  title         String
+  slug          String
+  excerpt       String?
+  content       Json     @default("[]")
+  metadata      Json     @default("{}")
+  seo           Json     @default("{}")
+  state         String   @default("draft") // draft, in_review, approved, scheduled, published, archived
+  authorId      String
+  reviewerIds   String[] @default([])
+  publishedAt   DateTime?
+  scheduledFor  DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  // Relations
+  workspace     Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  type          ContentType        @relation(fields: [typeId], references: [id])
+  author        User               @relation("ContentAuthor", fields: [authorId], references: [id])
+  workflowState WorkflowState?
+  metrics       ContentMetrics[]
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId, state])
+  @@index([authorId])
+  @@index([publishedAt])
+  @@map("content")
+}
+
+model ContentType {
+  id                String   @id @default(cuid())
+  workspaceId       String
+  name              String
+  slug              String
+  description       String?
+  schema            Json     @default("[]")
+  workflowTemplateId String?
+  seoTemplateId     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  content   Content[]
+
+  @@unique([workspaceId, slug])
+  @@map("content_types")
+}
+
+// =============================================================================
+// Editorial Workflow
+// =============================================================================
+
+model WorkflowState {
+  id          String   @id @default(cuid())
+  contentId   String   @unique
+  state       String   // draft, in_review, approved, scheduled, published, archived
+  assignedTo  String?
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  content     Content               @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  comments    WorkflowComment[]
+  transitions WorkflowTransition[]
+
+  @@map("workflow_states")
+}
+
+model WorkflowComment {
+  id              String   @id @default(cuid())
+  workflowStateId String
+  authorId        String
+  content         String
+  mentions        String[] @default([])
+  resolvedAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  workflowState WorkflowState @relation(fields: [workflowStateId], references: [id], onDelete: Cascade)
+  author        User          @relation(fields: [authorId], references: [id])
+
+  @@map("workflow_comments")
+}
+
+model WorkflowTransition {
+  id              String   @id @default(cuid())
+  workflowStateId String
+  fromState       String
+  toState         String
+  triggeredBy     String
+  triggeredAt     DateTime @default(now())
+  comment         String?
+
+  // Relations
+  workflowState WorkflowState @relation(fields: [workflowStateId], references: [id], onDelete: Cascade)
+  triggerer     User          @relation(fields: [triggeredBy], references: [id])
+
+  @@map("workflow_transitions")
+}
+
+model WorkflowTemplate {
+  id          String   @id @default(cuid())
+  workspaceId String
+  name        String
+  description String?
+  states      Json     @default("[]")
+  transitions Json     @default("[]")
+  defaultFor  String[] @default([])
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  creator   User      @relation(fields: [createdBy], references: [id])
+
+  @@map("workflow_templates")
+}
+
+// =============================================================================
+// Media & Assets
+// =============================================================================
+
+model MediaAsset {
+  id           String   @id @default(cuid())
+  workspaceId  String
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  width        Int?
+  height       Int?
+  duration     Int?     // for video/audio
+  variants     Json     @default("[]")
+  metadata     Json     @default("{}")
+  uploadedBy   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  uploader   User      @relation(fields: [uploadedBy], references: [id])
+
+  @@index([workspaceId])
+  @@index([uploadedBy])
+  @@index([mimeType])
+  @@map("media_assets")
+}
+
+// =============================================================================
+// Analytics & Metrics
+// =============================================================================
+
+model ContentMetrics {
+  id              String   @id @default(cuid())
+  contentId       String
+  date            DateTime @db.Date
+  views           Int      @default(0)
+  uniqueViews     Int      @default(0)
+  engagedTime     Int      @default(0) // seconds
+  depth           Float    @default(0) // average scroll depth
+  bounceRate      Float    @default(0)
+  conversions     Int      @default(0)
+  conversionValue Float    @default(0)
+  utmSource       String?
+  utmMedium       String?
+  utmCampaign     String?
+  referrer        String?
+  device          String?
+  browser         String?
+  country         String?
+  createdAt       DateTime @default(now())
+
+  // Relations
+  content Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@unique([contentId, date])
+  @@index([contentId])
+  @@index([date])
+  @@map("content_metrics")
+}
+
+model AnalyticsDashboard {
+  id          String   @id @default(cuid())
+  workspaceId String
+  name        String
+  type        String   // content, author, traffic, conversion, custom
+  config      Json     @default("{}")
+  createdBy   String
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  creator   User      @relation(fields: [createdBy], references: [id])
+
+  @@map("analytics_dashboards")
+}
+
+// =============================================================================
+// Audit & Governance
+// =============================================================================
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userId      String?
+  action      String   // create, update, delete, publish, unpublish, etc.
+  entityType  String   // content, user, workspace, etc.
+  entityId    String
+  oldValues   Json?
+  newValues   Json?
+  metadata    Json     @default("{}")
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@index([workspaceId])
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// =============================================================================
+// Sessions & Security
+// =============================================================================
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  workspaceId  String?
+  token        String   @unique
+  refreshToken String?  @unique
+  expiresAt    DateTime
+  lastAccessAt DateTime @default(now())
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([workspaceId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model ApiKey {
+  id          String   @id @default(cuid())
+  workspaceId String
+  name        String
+  keyHash     String   @unique
+  permissions Json     @default("[]")
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([workspaceId])
+  @@index([keyHash])
+  @@map("api_keys")
+}
