@@ -252,6 +252,7 @@ model MediaAsset {
 model ContentMetrics {
   id              String   @id @default(cuid())
   contentId       String
+  workspaceId     String
   date            DateTime @db.Date
   views           Int      @default(0)
   uniqueViews     Int      @default(0)
@@ -270,10 +271,12 @@ model ContentMetrics {
   createdAt       DateTime @default(now())
 
   // Relations
-  content Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  content   Content   @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@unique([contentId, date])
   @@index([contentId])
+  @@index([workspaceId])
   @@index([date])
   @@map("content_metrics")
 }

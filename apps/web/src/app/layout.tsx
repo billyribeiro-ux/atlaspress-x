@@ -1,6 +1,21 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import { validateEnv } from '@/lib/env'
+import { ThemeProvider } from '@/components/theme-provider'
+import { AuthProvider } from '@/components/auth-provider'
+
+// Validate environment at startup (non-blocking for development)
+try {
+  const envValidation = validateEnv()
+  if (!envValidation.success && envValidation.error && typeof envValidation.error === 'object' && 'issues' in envValidation.error) {
+    // eslint-disable-next-line no-console
+    console.warn('⚠️ Environment validation warnings:', (envValidation.error as any).issues)
+  }
+} catch (error) {
+  // eslint-disable-next-line no-console
+  console.warn('⚠️ Environment validation failed:', error)
+}
 
 const inter = Inter({
   subsets: ['latin'],
@@ -61,9 +76,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`min-h-screen bg-background font-sans antialiased ${inter.variable}`}>
-        <div className="relative flex min-h-screen flex-col">
-          {children}
-        </div>
+        <AuthProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   )

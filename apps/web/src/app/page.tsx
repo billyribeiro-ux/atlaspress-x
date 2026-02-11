@@ -15,10 +15,10 @@ export default function HomePage() {
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <Button size="lg" asChild>
-              <Link href="/auth/signin">Get Started</Link>
+              <Link href="/login">Get Started</Link>
             </Button>
             <Button variant="outline" size="lg" asChild>
-              <Link href="/docs">Documentation</Link>
+              <Link href="/dashboard">Dashboard</Link>
             </Button>
           </div>
         </div>
@@ -29,11 +29,11 @@ export default function HomePage() {
               Built for Enterprise Teams
             </h2>
             <p className="mt-6 text-lg leading-8 text-muted-foreground">
-              World-class publishing workflows, enterprise SEO, scalable performance, 
+              World-class publishing workflows, enterprise SEO, scalable performance,
               governance and auditability, and growth analytics.
             </p>
           </div>
-          
+
           <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:gap-8">
             <Card>
               <CardHeader>

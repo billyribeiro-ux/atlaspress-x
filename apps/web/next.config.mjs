@@ -10,8 +10,8 @@ const nextConfig = {
   },
   transpilePackages: ['@atlaspress/types', '@atlaspress/database'],
   env: {
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
   },
   async headers() {
     return [
@@ -49,9 +49,20 @@ const nextConfig = {
   },
 }
 
-export default withSentryConfig(nextConfig, {
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
-  silent: !process.env.CI,
-  widenClientFileUpload: true,
-})
+// Only enable Sentry in production or when explicitly configured
+const isSentryEnabled = process.env.SENTRY_ORG && process.env.SENTRY_PROJECT && process.env.SENTRY_AUTH_TOKEN
+
+const finalConfig = isSentryEnabled
+  ? withSentryConfig(nextConfig, {
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+    silent: !process.env.CI,
+    widenClientFileUpload: true,
+    // Disable source maps in dev
+    sourcemaps: {
+      disable: process.env.NODE_ENV === 'development',
+    },
+  })
+  : nextConfig
+
+export default finalConfig

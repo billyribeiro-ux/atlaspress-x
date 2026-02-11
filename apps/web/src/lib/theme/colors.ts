@@ -1,0 +1,61 @@
+import { designTokens } from './tokens'
+
+export const lightTheme = {
+  // CSS Custom Properties for light theme
+  '--background': designTokens.colors.neutral[50],
+  '--foreground': designTokens.colors.neutral[900],
+  '--muted': designTokens.colors.neutral[100],
+  '--muted-foreground': designTokens.colors.neutral[500],
+  '--popover': designTokens.colors.neutral[50],
+  '--popover-foreground': designTokens.colors.neutral[900],
+  '--card': designTokens.colors.neutral[50],
+  '--card-foreground': designTokens.colors.neutral[900],
+  '--border': designTokens.colors.neutral[200],
+  '--input': designTokens.colors.neutral[100],
+  '--ring': designTokens.colors.primary[500],
+  '--primary': designTokens.colors.primary[500],
+  '--primary-foreground': designTokens.colors.neutral[50],
+  '--secondary': designTokens.colors.neutral[100],
+  '--secondary-foreground': designTokens.colors.neutral[900],
+  '--accent': designTokens.colors.neutral[100],
+  '--accent-foreground': designTokens.colors.neutral[900],
+  '--destructive': designTokens.colors.error[500],
+  '--destructive-foreground': designTokens.colors.neutral[50],
+  '--success': designTokens.colors.success[500],
+  '--success-foreground': designTokens.colors.neutral[50],
+  '--warning': designTokens.colors.warning[500],
+  '--warning-foreground': designTokens.colors.neutral[900],
+  '--info': designTokens.colors.info[500],
+  '--info-foreground': designTokens.colors.neutral[50],
+} as const
+
+export const darkTheme = {
+  // CSS Custom Properties for dark theme
+  '--background': designTokens.colors.neutral[950],
+  '--foreground': designTokens.colors.neutral[50],
+  '--muted': designTokens.colors.neutral[900],
+  '--muted-foreground': designTokens.colors.neutral[400],
+  '--popover': designTokens.colors.neutral[900],
+  '--popover-foreground': designTokens.colors.neutral[50],
+  '--card': designTokens.colors.neutral[900],
+  '--card-foreground': designTokens.colors.neutral[50],
+  '--border': designTokens.colors.neutral[800],
+  '--input': designTokens.colors.neutral[800],
+  '--ring': designTokens.colors.primary[400],
+  '--primary': designTokens.colors.primary[400],
+  '--primary-foreground': designTokens.colors.neutral[950],
+  '--secondary': designTokens.colors.neutral[800],
+  '--secondary-foreground': designTokens.colors.neutral[50],
+  '--accent': designTokens.colors.neutral[800],
+  '--accent-foreground': designTokens.colors.neutral[50],
+  '--destructive': designTokens.colors.error[500],
+  '--destructive-foreground': designTokens.colors.neutral[50],
+  '--success': designTokens.colors.success[500],
+  '--success-foreground': designTokens.colors.neutral[950],
+  '--warning': designTokens.colors.warning[500],
+  '--warning-foreground': designTokens.colors.neutral[950],
+  '--info': designTokens.colors.info[500],
+  '--info-foreground': designTokens.colors.neutral[950],
+} as const
+
+export type Theme = typeof lightTheme
