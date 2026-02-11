@@ -9,14 +9,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    session: ({ session, token }: any) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    session: ({ session, token }: { session: any; token: any }) => ({
       ...session,
       user: {
         ...session.user,
         id: token.sub,
       },
     }),
-    jwt: ({ token, user }: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    jwt: ({ token, user }: { token: any; user: any }) => {
       if (user) {
         token.sub = user.id
       }

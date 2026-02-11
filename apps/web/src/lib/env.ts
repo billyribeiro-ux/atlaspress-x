@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z, type ZodError } from 'zod'
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']),
@@ -45,8 +45,8 @@ export function validateEnv() {
     console.error('❌ Environment validation failed:')
     if (error && typeof error === 'object' && 'flatten' in error) {
       // eslint-disable-next-line no-console
-      console.error((error as any).flatten().fieldErrors)
+      console.error((error as ZodError).flatten().fieldErrors)
     }
-    return { success: false, error }
+    return { success: false, error: error as ZodError | unknown }
   }
 }

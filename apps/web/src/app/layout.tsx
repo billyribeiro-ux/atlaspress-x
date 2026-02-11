@@ -10,7 +10,7 @@ try {
   const envValidation = validateEnv()
   if (!envValidation.success && envValidation.error && typeof envValidation.error === 'object' && 'issues' in envValidation.error) {
     // eslint-disable-next-line no-console
-    console.warn('⚠️ Environment validation warnings:', (envValidation.error as any).issues)
+    console.warn('⚠️ Environment validation warnings:', (envValidation.error as { issues: unknown }).issues)
   }
 } catch (error) {
   // eslint-disable-next-line no-console
@@ -74,7 +74,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className={`min-h-screen bg-background font-sans antialiased ${inter.variable}`}>
         <AuthProvider>
           <ThemeProvider
